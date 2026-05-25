@@ -14,15 +14,34 @@ const Dashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [ordersRes, tablesRes, reportRes] = await Promise.all([
-        API.get('/orders'),
-        API.get('/tables'),
-        API.get('/billing/reports/daily').catch(() => ({ data: { totalOrders: 0, totalRevenue: 0 } }))
-      ]);
+      // Fetch each independently so one failure doesn't break everything
+      let orders = [];
+      let tables = [];
+      let report = { totalRevenue: 0, totalOrders: 0 };
 
-      const orders = ordersRes.data;
-      const tables = tablesRes.data;
-      const report = reportRes.data;
+      try {
+        const res = await API.get('/orders');
+        orders = res.data;
+      } catch (e) {
+        console.warn('Failed to load orders:', e.message);
+      }
+
+      try {
+        const res = await API.get('/tables');
+        tables = res.data;
+      } catch (e) {
+        console.warn('Failed to load tables:', e.message);
+      }
+
+      try {
+        const res = await API.get('/billing/reports/daily');
+        report = res.data;
+      } catch (e) {
+        const msg = e.response?.data?.message;
+        if (e.response?.status === 403) {
+          toast.error(msg || 'No permission for revenue report — log in as Admin');
+        }
+      }
 
       const todayOrders = orders.filter(o => {
         const orderDate = new Date(o.createdAt).toDateString();
@@ -90,8 +109,6 @@ const Dashboard = () => {
               <tr>
                 <th className="text-left px-6 py-3 text-sm font-semibold text-amber-800">Order ID</th>
                 <th className="text-left px-6 py-3 text-sm font-semibold text-amber-800">Table</th>
-                <th className="text-left px-6 py-3 text-sm font-semibold text-amber-800">Waiter</th>
-                <th className="text-left px-6 py-3 text-sm font-semibold text-amber-800">Contact</th>
                 <th className="text-left px-6 py-3 text-sm font-semibold text-amber-800">Items</th>
                 <th className="text-left px-6 py-3 text-sm font-semibold text-amber-800">Total</th>
                 <th className="text-left px-6 py-3 text-sm font-semibold text-amber-800">Status</th>
@@ -100,19 +117,12 @@ const Dashboard = () => {
             </thead>
             <tbody className="divide-y divide-beige-200">
               {recentOrders.length === 0 ? (
-                <tr><td colSpan="8" className="px-6 py-8 text-center text-amber-800/60 italic">No orders yet</td></tr>
+                <tr><td colSpan="6" className="px-6 py-8 text-center text-amber-800/60 italic">No orders yet</td></tr>
               ) : (
                 recentOrders.map((order) => (
                   <tr key={order._id} className="hover:bg-beige-50 transition-colors">
                     <td className="px-6 py-4 text-sm text-black font-mono">#{order._id.slice(-6)}</td>
                     <td className="px-6 py-4 text-sm text-black">Table {order.tableId?.tableNumber || 'N/A'}</td>
-                    <td className="px-6 py-4 text-sm text-black">
-                      {order.waiterId?.name || 'N/A'}
-                      <span className="text-amber-800/70 text-xs block capitalize">{order.waiterId?.role}</span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-black/70">
-                      {order.waiterId?.phone || '—'}
-                    </td>
                     <td className="px-6 py-4 text-sm text-black">{order.items.length} items</td>
                     <td className="px-6 py-4 text-sm text-black font-semibold">₹{order.items.reduce((s, i) => s + i.price * i.quantity, 0).toFixed(2)}</td>
                     <td className="px-6 py-4">

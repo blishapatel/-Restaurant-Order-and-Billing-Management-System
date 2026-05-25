@@ -39,7 +39,7 @@ const CashierPanel = () => {
       const { data } = await API.post(`/billing/generate/${order._id}`, { discount: 0 });
       setBill(data);
     } catch (error) {
-      toast.error('Failed to generate bill');
+      toast.error(error.response?.data?.message || 'Failed to generate bill');
     }
   };
 
@@ -93,7 +93,7 @@ const CashierPanel = () => {
       <header className="bg-white border-b border-neutral-300 px-6 py-4 flex items-center justify-between sticky top-0 z-10 no-print">
         <div>
           <h1 className="text-2xl font-bold text-black">Cashier Panel</h1>
-          <p className="text-sm text-neutral-600">{user?.name} · {user?.role} · {user?.phone}</p>
+          <p className="text-sm text-neutral-600">{user?.name} · {user?.role}</p>
         </div>
         <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 bg-black text-white hover:bg-neutral-800 cursor-pointer">
           <HiOutlineLogout size={18} /> Logout
@@ -150,7 +150,7 @@ const CashierPanel = () => {
                     {order.items.length} items · ₹{order.items.reduce((s, i) => s + i.price * i.quantity, 0).toFixed(2)}
                   </p>
                   <p className="text-xs text-neutral-500 mt-1">
-                    Waiter: {order.waiterId?.name || 'N/A'} ({order.waiterId?.role})
+                    {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </button>
               ))

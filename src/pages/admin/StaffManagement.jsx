@@ -16,7 +16,7 @@ const StaffManagement = () => {
       const { data } = await API.get('/auth/staff');
       setStaff(data);
     } catch (error) {
-      toast.error('Failed to load staff');
+      toast.error(error.response?.data?.message || 'Failed to load staff');
     } finally {
       setLoading(false);
     }

@@ -7,7 +7,6 @@ const RestaurantBill = ({
   bill,
   paymentMethod,
   discount = 0,
-  showStaff = true,
   showPrintButton = true,
   printId = 'restaurant-bill-print',
 }) => {
@@ -59,16 +58,7 @@ const RestaurantBill = ({
           {paymentMethod && <p><span>Payment:</span> {paymentMethod}</p>}
         </div>
 
-        {showStaff && order.waiterId && (
-          <>
-            <div className="receipt-line" />
-            <div className="receipt-meta">
-              <p><span>Waiter:</span> {order.waiterId.name}</p>
-              <p><span>Role:</span> {order.waiterId.role}</p>
-              {order.waiterId.phone && <p><span>Ph:</span> {order.waiterId.phone}</p>}
-            </div>
-          </>
-        )}
+
 
         <div className="receipt-line" />
 
