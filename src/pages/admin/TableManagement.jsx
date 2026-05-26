@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
+import PanelRefreshButton from '../../components/PanelRefreshButton';
 import { HiOutlinePlus, HiOutlineTrash, HiOutlineQrcode, HiOutlineX } from 'react-icons/hi';
 
 const TableManagement = () => {
@@ -13,6 +14,7 @@ const TableManagement = () => {
   useEffect(() => { fetchTables(); }, []);
 
   const fetchTables = async () => {
+    setLoading(true);
     try {
       const { data } = await API.get('/tables');
       setTables(data);
@@ -86,14 +88,17 @@ const TableManagement = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
         <p className="text-amber-800">Manage restaurant tables and generate QR codes</p>
+        <div className="flex items-center gap-2">
+          <PanelRefreshButton onClick={fetchTables} loading={loading} />
         <button
           onClick={() => setShowForm(!showForm)}
           className="flex items-center gap-2 px-5 py-2.5 bg-amber-800 text-beige-50 rounded-xl hover:bg-amber-700 transition-colors font-medium cursor-pointer"
         >
           {showForm ? <><HiOutlineX /> Cancel</> : <><HiOutlinePlus /> Add Table</>}
         </button>
+        </div>
       </div>
 
       {showForm && (

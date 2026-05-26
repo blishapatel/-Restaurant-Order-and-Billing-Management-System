@@ -11,6 +11,7 @@ import CategoryManagement from './pages/admin/CategoryManagement.jsx';
 import TableManagement from './pages/admin/TableManagement.jsx';
 import StaffManagement from './pages/admin/StaffManagement.jsx';
 import BillingHistory from './pages/admin/BillingHistory.jsx';
+import Analytics from './pages/admin/Analytics.jsx';
 import WaiterPanel from './pages/WaiterPanel.jsx';
 import KitchenPanel from './pages/KitchenPanel.jsx';
 import CashierPanel from './pages/CashierPanel.jsx';
@@ -42,7 +43,9 @@ function App() {
               <AdminLayout />
             </ProtectedRoute>
           }>
+            <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="analytics" element={<Analytics />} />
             <Route path="menu" element={<MenuManagement />} />
             <Route path="categories" element={<CategoryManagement />} />
             <Route path="tables" element={<TableManagement />} />

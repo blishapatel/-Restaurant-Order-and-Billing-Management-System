@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import RestaurantBill from '../components/RestaurantBill';
+import PanelRefreshButton from '../components/PanelRefreshButton';
 import { HiOutlineLogout, HiOutlineArrowLeft } from 'react-icons/hi';
 
 const CashierPanel = () => {
@@ -21,6 +22,7 @@ const CashierPanel = () => {
   useEffect(() => { fetchOrders(); }, []);
 
   const fetchOrders = async () => {
+    setLoading(true);
     try {
       const { data } = await API.get('/orders');
       setOrders(data.filter((o) => o.status === 'served'));
@@ -95,9 +97,12 @@ const CashierPanel = () => {
           <h1 className="text-2xl font-bold text-black">Cashier Panel</h1>
           <p className="text-sm text-neutral-600">{user?.name} · {user?.role}</p>
         </div>
-        <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 bg-black text-white hover:bg-neutral-800 cursor-pointer">
-          <HiOutlineLogout size={18} /> Logout
-        </button>
+        <div className="flex items-center gap-2">
+          <PanelRefreshButton onClick={fetchOrders} loading={loading} className="border-neutral-400 text-black" />
+          <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 bg-black text-white hover:bg-neutral-800 cursor-pointer">
+            <HiOutlineLogout size={18} /> Logout
+          </button>
+        </div>
       </header>
 
       {paidReceipt && (

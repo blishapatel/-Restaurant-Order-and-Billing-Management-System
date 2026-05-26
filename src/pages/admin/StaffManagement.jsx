@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
+import PanelRefreshButton from '../../components/PanelRefreshButton';
 import { HiOutlinePlus, HiOutlineTrash, HiOutlineX } from 'react-icons/hi';
 
 const StaffManagement = () => {
@@ -12,6 +13,7 @@ const StaffManagement = () => {
   useEffect(() => { fetchStaff(); }, []);
 
   const fetchStaff = async () => {
+    setLoading(true);
     try {
       const { data } = await API.get('/auth/staff');
       setStaff(data);
@@ -60,13 +62,29 @@ const StaffManagement = () => {
     </div>
   );
 
+  const formatJoined = (dateStr) => {
+    if (!dateStr) return '—';
+    return new Date(dateStr).toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <p className="text-amber-800">Manage restaurant staff members</p>
+      <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-5 text-sm text-amber-900">
+        Everyone who <strong>registers</strong> on the login page is saved in MongoDB and appears here automatically.
+        Staff added by admin are stored the same way — data stays after you close the website.
+      </div>
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
+        <p className="text-amber-800">Manage restaurant staff members ({staff.length})</p>
+        <div className="flex items-center gap-2">
+          <PanelRefreshButton onClick={fetchStaff} loading={loading} />
         <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 px-5 py-2.5 bg-amber-800 text-beige-50 rounded-xl hover:bg-amber-700 transition-colors font-medium cursor-pointer">
           {showForm ? <><HiOutlineX /> Cancel</> : <><HiOutlinePlus /> Add Staff</>}
         </button>
+        </div>
       </div>
 
       {showForm && (
@@ -114,6 +132,7 @@ const StaffManagement = () => {
                 <th className="text-left px-6 py-3 text-sm font-semibold text-amber-800">Email</th>
                 <th className="text-left px-6 py-3 text-sm font-semibold text-amber-800">Phone</th>
                 <th className="text-left px-6 py-3 text-sm font-semibold text-amber-800">Role</th>
+                <th className="text-left px-6 py-3 text-sm font-semibold text-amber-800">Joined</th>
                 <th className="text-left px-6 py-3 text-sm font-semibold text-amber-800">Actions</th>
               </tr>
             </thead>
@@ -126,6 +145,7 @@ const StaffManagement = () => {
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${roleColors[s.role]}`}>{s.role}</span>
                   </td>
+                  <td className="px-6 py-4 text-sm text-amber-800/80">{formatJoined(s.createdAt)}</td>
                   <td className="px-6 py-4">
                     <button onClick={() => handleDelete(s._id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer">
                       <HiOutlineTrash size={18} />

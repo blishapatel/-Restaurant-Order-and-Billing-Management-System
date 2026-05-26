@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
+import PanelRefreshButton from '../../components/PanelRefreshButton';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineX } from 'react-icons/hi';
 
 const MenuManagement = () => {
@@ -16,6 +17,7 @@ const MenuManagement = () => {
   }, []);
 
   const fetchData = async () => {
+    setLoading(true);
     try {
       const [menuRes, catRes] = await Promise.all([
         API.get('/menu'),
@@ -93,14 +95,20 @@ const MenuManagement = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <p className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mb-4 text-sm text-amber-900">
+        Menu items are saved in MongoDB permanently. Close the browser and reopen — your items will still be here.
+      </p>
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
         <p className="text-amber-800">Manage your restaurant menu items</p>
+        <div className="flex items-center gap-2">
+          <PanelRefreshButton onClick={fetchData} loading={loading} />
         <button
           onClick={() => { setShowForm(!showForm); setEditingItem(null); setForm({ name: '', price: '', category: '', description: '', isAvailable: true }); }}
           className="flex items-center gap-2 px-5 py-2.5 bg-amber-800 text-beige-50 rounded-xl hover:bg-amber-700 transition-colors font-medium cursor-pointer"
         >
           {showForm ? <><HiOutlineX /> Cancel</> : <><HiOutlinePlus /> Add Item</>}
         </button>
+        </div>
       </div>
 
       {showForm && (

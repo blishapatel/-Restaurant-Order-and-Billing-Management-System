@@ -3,6 +3,7 @@ import API from '../api/axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import PanelRefreshButton from '../components/PanelRefreshButton';
 import { HiOutlineLogout, HiOutlinePlus, HiOutlineMinus, HiOutlineShoppingCart, HiOutlineX, HiOutlineArrowLeft } from 'react-icons/hi';
 
 const WaiterPanel = () => {
@@ -20,6 +21,7 @@ const WaiterPanel = () => {
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
+    setLoading(true);
     try {
       const [tablesRes, menuRes, catRes] = await Promise.all([
         API.get('/tables'),
@@ -124,9 +126,12 @@ const WaiterPanel = () => {
               {user?.name} · {user?.role} · {user?.phone || user?.email}
             </p>
           </div>
-          <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 bg-amber-800 text-beige-50 rounded-xl hover:bg-amber-700 transition-colors cursor-pointer">
-            <HiOutlineLogout size={18} /> Logout
-          </button>
+          <div className="flex items-center gap-2">
+            <PanelRefreshButton onClick={fetchData} loading={loading} />
+            <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 bg-amber-800 text-beige-50 rounded-xl hover:bg-amber-700 transition-colors cursor-pointer">
+              <HiOutlineLogout size={18} /> Logout
+            </button>
+          </div>
         </header>
         <div className="p-6">
           <h2 className="text-xl font-bold text-black mb-2">Select a Table</h2>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
+import PanelRefreshButton from '../../components/PanelRefreshButton';
 import { HiOutlinePlus, HiOutlineTrash } from 'react-icons/hi';
 
 const CategoryManagement = () => {
@@ -11,6 +12,7 @@ const CategoryManagement = () => {
   useEffect(() => { fetchCategories(); }, []);
 
   const fetchCategories = async () => {
+    setLoading(true);
     try {
       const { data } = await API.get('/categories');
       setCategories(data);
@@ -53,7 +55,13 @@ const CategoryManagement = () => {
 
   return (
     <div className="max-w-2xl">
-      <p className="text-amber-800 mb-6">Manage food categories for your menu</p>
+      <p className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mb-4 text-sm text-amber-900">
+        Categories are stored in MongoDB and kept forever until you delete them.
+      </p>
+      <div className="flex justify-between items-center mb-6">
+        <p className="text-amber-800">Manage food categories for your menu</p>
+        <PanelRefreshButton onClick={fetchCategories} loading={loading} />
+      </div>
 
       <form onSubmit={handleAdd} className="bg-white rounded-2xl border border-beige-300 p-6 mb-6 shadow-sm">
         <h3 className="text-lg font-bold text-black mb-4">Add New Category</h3>

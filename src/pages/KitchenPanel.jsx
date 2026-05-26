@@ -3,7 +3,8 @@ import API from '../api/axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { HiOutlineLogout, HiOutlineCheck, HiOutlineRefresh } from 'react-icons/hi';
+import PanelRefreshButton from '../components/PanelRefreshButton';
+import { HiOutlineLogout, HiOutlineCheck } from 'react-icons/hi';
 
 const KitchenPanel = () => {
   const [orders, setOrders] = useState([]);
@@ -18,6 +19,7 @@ const KitchenPanel = () => {
   }, []);
 
   const fetchOrders = async () => {
+    setLoading(true);
     try {
       const { data } = await API.get('/orders');
       setOrders(data.filter(o => o.status === 'pending' || o.status === 'in-kitchen'));
@@ -71,9 +73,7 @@ const KitchenPanel = () => {
           <p className="text-sm text-amber-800">{user?.name} · {user?.role} · {user?.phone} | Auto-refresh 30s</p>
         </div>
         <div className="flex gap-3">
-          <button onClick={fetchOrders} className="flex items-center gap-2 px-4 py-2 bg-beige-200 text-black rounded-xl hover:bg-beige-300 transition-colors cursor-pointer">
-            <HiOutlineRefresh size={18} /> Refresh
-          </button>
+          <PanelRefreshButton onClick={fetchOrders} loading={loading} />
           <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 bg-amber-800 text-beige-50 rounded-xl hover:bg-amber-700 transition-colors cursor-pointer">
             <HiOutlineLogout size={18} /> Logout
           </button>
