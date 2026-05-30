@@ -11,7 +11,7 @@ A full-stack restaurant management app for taking orders, kitchen workflow, cash
 | **Admin** | Dashboard, **Analytics** (graphs), menu/categories/tables, staff, orders & bills history, all panels |
 | **Waiter** | Select table, take orders, view serving staff info |
 | **Kitchen** | View orders, mark as in-kitchen / served |
-| **Cashier** | Bill served orders, **demo** payments (Card / UPI / Razorpay), print receipt |
+| **Cashier** | Bill served orders, print receipt, confirm payment |
 
 Every panel includes a **Refresh** button to reload data without reloading the page.
 
@@ -138,7 +138,7 @@ All important data is saved in the **MongoDB database**, not in the browser. You
 
 1. **MongoDB must be running** when you use the app (local or Atlas).
 2. **Backend must be running** (`npm run dev` in `backend`) when you add or edit data.
-3. **`npm run seed`** skips if data already exists (safe). Use **`npm run seed:fresh`** only when you want to wipe users/menu/tables and reload demo data (orders & bills are **not** deleted).
+3. Do **not** run `npm run seed` unless you want to **erase all data** and start fresh with demo items only.
 
 The frontend website alone does not store your business data — the **backend + MongoDB** does.
 
@@ -148,35 +148,8 @@ The frontend website alone does not store your business data — the **backend +
 
 1. **Waiter** — Log in → pick a table → add menu items → place order.
 2. **Kitchen** — Log in → open order → mark **In Kitchen** → then **Served**.
-3. **Cashier** — Log in → select served order → choose payment (Cash / Card / UPI / Razorpay) → complete **demo** payment → **Print Bill** on success screen.
+3. **Cashier** — Log in → select served order → generate bill → **Print Bill** → confirm payment.
 4. **Admin** — Dashboard → **Analytics** (revenue & popular items) → **Orders & Bills** (table numbers, full history) → manage menu/staff/tables.
-
----
-
-## Demo payment methods (no real money)
-
-All payments are **fake / educational only**. Nothing is charged to a real card, UPI, or Razorpay account. Details are saved on the bill in MongoDB for your project demo.
-
-| Method | What happens |
-|--------|----------------|
-| **Cash** | Confirm dialog → bill saved with demo transaction ID |
-| **Card** | Modal: card number, name, expiry, CVV (use demo `4111 1111 1111 1111`) → processing animation → success |
-| **UPI** | Modal: fake QR + UPI ID (e.g. `demo@upi`) → processing → success |
-| **Razorpay** | Modal styled like Razorpay checkout → fake order/payment IDs → success |
-
-Receipt and **Orders & Bills** show payment method, transaction ID, last 4 digits (card), or UPI ID where applicable.
-
-**No API keys** — no Razorpay SDK, no real gateway, no webhooks.
-
----
-
-## Print bill (fixed blank page)
-
-**Print Bill** opens a **separate print window** with only the receipt HTML (not the whole app). This fixes the blank white page issue.
-
-- Allow **pop-ups** in the browser if print does nothing.
-- Works from: Cashier after payment, **Orders & Bills → View / Print**, and any bill preview.
-- Use **Print Bill** on the receipt, not the browser’s generic Print on the full page.
 
 ---
 
@@ -197,7 +170,7 @@ Receipt and **Orders & Bills** show payment method, transaction ID, last 4 digit
 - **Revenue trend** — daily revenue (last 30 days)
 - **Busiest days** — average revenue by weekday
 - **Top selling items** — bar chart + top 5 list
-- **Payment methods** — Cash / Card / UPI / Razorpay breakdown
+- **Payment methods** — Cash / Card / UPI breakdown
 - Summary cards: total revenue, orders, average order value, best seller
 
 ### Orders & Bills
@@ -224,8 +197,7 @@ Available on: Dashboard, Analytics, Menu, Categories, Tables, Staff, Orders & Bi
 |---------|-------------|
 | `npm run dev` | Start backend with nodemon (auto-restart) |
 | `npm start` | Start backend (production) |
-| `npm run seed` | Loads demo data **only if database is empty** (safe — does not wipe existing data) |
-| `npm run seed:fresh` | **Wipes** users, menu, categories, tables and reloads demo staff/menu (keeps orders & bills) |
+| `npm run seed` | **Deletes all data** and loads demo menu/tables/staff (use only for first setup) |
 
 ---
 
@@ -246,7 +218,7 @@ Available on: Dashboard, Analytics, Menu, Categories, Tables, Staff, Orders & Bi
 
 - Open **Orders & Bills** and click **All dates** (not only today's date).
 - Bills are never removed when you close the browser — only filtered by date in the UI.
-- Make sure MongoDB is still running. Avoid `npm run seed:fresh` unless you intend to reset menu/staff.
+- Make sure MongoDB is still running and you did not run `npm run seed` (that wipes the database).
 
 ### Table number missing on very old bills
 
@@ -260,19 +232,13 @@ Available on: Dashboard, Analytics, Menu, Categories, Tables, Staff, Orders & Bi
 
 ### Menu or categories disappeared
 
-- You may have run `npm run seed:fresh` — it resets menu and staff.
+- You may have run `npm run seed` — it deletes everything.
 - Ensure MongoDB is running and backend was connected when you added items.
 
 ### Analytics shows no data
 
 - Complete at least one payment in the Cashier panel.
 - Open **Analytics** → click **Refresh**.
-
-### Print shows blank page
-
-- Click **Print Bill** on the receipt (not Ctrl+P on the whole page).
-- Allow pop-ups for `localhost:5173`.
-- Receipt opens in a new window, then the print dialog appears.
 
 ### MongoDB connection error
 

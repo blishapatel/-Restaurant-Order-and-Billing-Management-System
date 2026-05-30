@@ -1,0 +1,174 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: 'Times New Roman', 'Georgia', serif;
+  --color-beige-50: #FFF8F0;
+  --color-beige-100: #FAF6F0;
+  --color-beige-200: #F5F0E8;
+  --color-beige-300: #EBE3D5;
+  --color-beige-400: #D4C5A9;
+  --color-beige-500: #C2B280;
+  --color-amber-600: #B8860B;
+  --color-amber-700: #996515;
+  --color-amber-800: #7A5C2E;
+}
+
+/* Restaurant receipt — screen + print */
+.restaurant-receipt {
+  max-width: 320px;
+  background: #fff;
+  color: #000;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 16px 14px;
+  border: 2px solid #000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.receipt-header {
+  text-align: center;
+}
+
+.receipt-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin: 0 0 4px;
+  text-transform: uppercase;
+}
+
+.receipt-sub {
+  margin: 0;
+  font-size: 10px;
+}
+
+.receipt-line {
+  border-top: 1px dashed #000;
+  margin: 10px 0;
+}
+
+.receipt-line.thin {
+  margin: 6px 0;
+}
+
+.receipt-meta p {
+  margin: 2px 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.receipt-meta span {
+  font-weight: 700;
+}
+
+.receipt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.receipt-table th {
+  border-bottom: 1px solid #000;
+  padding: 4px 2px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+.receipt-table td {
+  padding: 3px 2px;
+  vertical-align: top;
+  border-bottom: 1px dotted #ccc;
+}
+
+.receipt-table .item-name {
+  max-width: 120px;
+  word-break: break-word;
+}
+
+.receipt-totals .receipt-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 3px 0;
+}
+
+.receipt-totals .receipt-row.grand {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.receipt-footer {
+  text-align: center;
+  font-size: 11px;
+}
+
+.receipt-footer p {
+  margin: 2px 0;
+}
+
+.receipt-note {
+  font-size: 9px;
+  margin-top: 8px !important;
+}
+
+@media print {
+  @page {
+    size: 80mm auto;
+    margin: 4mm;
+  }
+
+  body {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide everything by default */
+  body > * {
+    display: none !important;
+  }
+
+  /* But show the React root */
+  #root {
+    display: block !important;
+  }
+
+  /* Hide all elements inside root */
+  #root * {
+    visibility: hidden;
+    position: static;
+    overflow: visible;
+  }
+
+  /* Show only receipt elements */
+  .restaurant-receipt,
+  .restaurant-receipt * {
+    visibility: visible !important;
+  }
+
+  .restaurant-receipt {
+    position: absolute !important;
+    left: 0;
+    top: 0;
+    max-width: 80mm;
+    width: 80mm;
+    margin: 0;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 2mm !important;
+  }
+
+  /* Completely hide no-print elements */
+  .no-print,
+  .no-print * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  header, nav, aside, footer {
+    display: none !important;
+  }
+}
