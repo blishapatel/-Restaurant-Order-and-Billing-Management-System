@@ -5,7 +5,21 @@ const PanelRefreshButton = ({ onClick, loading = false, className = '' }) => (
     type="button"
     onClick={onClick}
     disabled={loading}
-    className={`flex items-center gap-2 px-3 py-2 text-sm font-medium border border-beige-300 rounded-xl bg-white text-amber-800 hover:bg-beige-100 disabled:opacity-50 cursor-pointer transition-colors ${className}`}
+    className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl disabled:opacity-50 cursor-pointer ${className}`}
+    style={{
+      background: 'var(--surface)',
+      border: '1px solid var(--border)',
+      color: 'var(--text-secondary)',
+      transition: 'var(--transition)',
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.background = 'var(--surface-hover)';
+      e.currentTarget.style.borderColor = 'var(--border-focus)';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.background = 'var(--surface)';
+      e.currentTarget.style.borderColor = 'var(--border)';
+    }}
   >
     <HiOutlineRefresh size={16} className={loading ? 'animate-spin' : ''} />
     Refresh

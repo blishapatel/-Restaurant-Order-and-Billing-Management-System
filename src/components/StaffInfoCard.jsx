@@ -10,8 +10,8 @@ const StaffInfoCard = ({ staff, title = 'Staff', compact = false }) => {
 
   if (compact) {
     return (
-      <p className="text-xs text-amber-800">
-        <span className="font-medium text-black">{staff.name}</span>
+      <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+        <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{staff.name}</span>
         {' · '}{roleLabels[staff.role] || staff.role}
         {staff.phone && <> · {staff.phone}</>}
       </p>
@@ -19,12 +19,23 @@ const StaffInfoCard = ({ staff, title = 'Staff', compact = false }) => {
   }
 
   return (
-    <div className="bg-beige-50 border border-beige-300 rounded-xl p-3 text-sm">
-      <p className="text-xs font-semibold text-amber-800 uppercase tracking-wide mb-2">{title}</p>
-      <p className="font-semibold text-black">{staff.name}</p>
-      <p className="text-amber-800 capitalize">{roleLabels[staff.role] || staff.role}</p>
-      {staff.email && <p className="text-black/70">{staff.email}</p>}
-      {staff.phone && <p className="text-black/70">{staff.phone}</p>}
+    <div
+      className="rounded-xl p-3 text-sm"
+      style={{
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border)',
+      }}
+    >
+      <p
+        className="text-xs font-semibold uppercase tracking-wide mb-2"
+        style={{ color: 'var(--text-tertiary)' }}
+      >
+        {title}
+      </p>
+      <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{staff.name}</p>
+      <p className="capitalize" style={{ color: 'var(--text-secondary)' }}>{roleLabels[staff.role] || staff.role}</p>
+      {staff.email && <p style={{ color: 'var(--text-tertiary)' }}>{staff.email}</p>}
+      {staff.phone && <p style={{ color: 'var(--text-tertiary)' }}>{staff.phone}</p>}
     </div>
   );
 };

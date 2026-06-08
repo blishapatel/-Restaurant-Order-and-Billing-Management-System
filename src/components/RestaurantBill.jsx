@@ -30,7 +30,21 @@ const RestaurantBill = ({
           <button
             type="button"
             onClick={handlePrint}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white text-sm font-medium border border-black hover:bg-neutral-800 cursor-pointer"
+            className="btn-primary inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg cursor-pointer"
+            style={{
+              background: 'var(--accent)',
+              color: 'var(--accent-text)',
+              border: 'none',
+              transition: 'var(--transition)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--accent-hover)';
+              e.currentTarget.style.boxShadow = 'var(--shadow-glow)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--accent)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           >
             <HiOutlinePrinter size={18} />
             Print Bill

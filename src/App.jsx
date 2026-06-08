@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext.jsx';
+import { ThemeProvider } from './context/ThemeContext.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import AdminLayout from './components/AdminLayout.jsx';
 import Login from './pages/Login.jsx';
@@ -19,62 +20,78 @@ import PublicMenu from './pages/PublicMenu.jsx';
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: {
-              fontFamily: "'Times New Roman', serif",
-              background: '#FFF8F0',
-              color: '#000',
-              border: '1px solid #EBE3D5',
-            },
-          }}
-        />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/menu/table/:tableNumber" element={<PublicMenu />} />
-          
-          {/* Admin routes */}
-          <Route path="/admin" element={
-            <ProtectedRoute roles={['admin']}>
-              <AdminLayout />
-            </ProtectedRoute>
-          }>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="analytics" element={<Analytics />} />
-            <Route path="menu" element={<MenuManagement />} />
-            <Route path="categories" element={<CategoryManagement />} />
-            <Route path="tables" element={<TableManagement />} />
-            <Route path="staff" element={<StaffManagement />} />
-            <Route path="billing" element={<BillingHistory />} />
-          </Route>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                fontFamily: "'Inter', sans-serif",
+                background: 'var(--surface)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border)',
+                boxShadow: 'var(--shadow-lg)',
+                borderRadius: 'var(--radius-md)',
+              },
+              success: {
+                iconTheme: {
+                  primary: 'var(--success)',
+                  secondary: '#fff',
+                },
+              },
+              error: {
+                iconTheme: {
+                  primary: 'var(--danger)',
+                  secondary: '#fff',
+                },
+              },
+            }}
+          />
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/menu/table/:tableNumber" element={<PublicMenu />} />
+            
+            {/* Admin routes */}
+            <Route path="/admin" element={
+              <ProtectedRoute roles={['admin']}>
+                <AdminLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="menu" element={<MenuManagement />} />
+              <Route path="categories" element={<CategoryManagement />} />
+              <Route path="tables" element={<TableManagement />} />
+              <Route path="staff" element={<StaffManagement />} />
+              <Route path="billing" element={<BillingHistory />} />
+            </Route>
 
-          {/* Role-specific routes */}
-          <Route path="/waiter" element={
-            <ProtectedRoute roles={['waiter', 'admin']}>
-              <WaiterPanel />
-            </ProtectedRoute>
-          } />
-          <Route path="/kitchen" element={
-            <ProtectedRoute roles={['kitchen', 'admin']}>
-              <KitchenPanel />
-            </ProtectedRoute>
-          } />
-          <Route path="/cashier" element={
-            <ProtectedRoute roles={['cashier', 'admin']}>
-              <CashierPanel />
-            </ProtectedRoute>
-          } />
+            {/* Role-specific routes */}
+            <Route path="/waiter" element={
+              <ProtectedRoute roles={['waiter', 'admin']}>
+                <WaiterPanel />
+              </ProtectedRoute>
+            } />
+            <Route path="/kitchen" element={
+              <ProtectedRoute roles={['kitchen', 'admin']}>
+                <KitchenPanel />
+              </ProtectedRoute>
+            } />
+            <Route path="/cashier" element={
+              <ProtectedRoute roles={['cashier', 'admin']}>
+                <CashierPanel />
+              </ProtectedRoute>
+            } />
 
-          <Route path="/" element={<Navigate to="/login" />} />
-          <Route path="*" element={<Navigate to="/login" />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+            <Route path="/" element={<Navigate to="/login" />} />
+            <Route path="*" element={<Navigate to="/login" />} />
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

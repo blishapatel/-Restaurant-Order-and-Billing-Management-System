@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import PanelRefreshButton from '../components/PanelRefreshButton';
+import ThemeToggle from '../components/ThemeToggle';
 import { HiOutlineLogout, HiOutlinePlus, HiOutlineMinus, HiOutlineShoppingCart, HiOutlineX, HiOutlineArrowLeft } from 'react-icons/hi';
 
 const WaiterPanel = () => {
@@ -102,53 +103,75 @@ const WaiterPanel = () => {
     ? menuItems
     : menuItems.filter(i => (i.category?._id || i.category) === selectedCategory);
 
-  const statusColors = {
-    available: 'from-green-50 to-green-100 border-green-400',
-    occupied: 'from-red-50 to-red-100 border-red-400',
-    reserved: 'from-yellow-50 to-yellow-100 border-yellow-400'
-  };
-
   const handleLogout = () => { logout(); navigate('/login'); };
 
   if (loading) return (
-    <div className="min-h-screen bg-beige-50 flex items-center justify-center font-serif">
-      <div className="w-10 h-10 border-4 border-amber-800 border-t-transparent rounded-full animate-spin"></div>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-primary)' }}>
+      <div
+        className="w-10 h-10 rounded-full animate-spin"
+        style={{ border: '4px solid var(--accent)', borderTopColor: 'transparent' }}
+      />
     </div>
   );
 
   if (!selectedTable) {
     return (
-      <div className="min-h-screen bg-beige-50 font-serif">
-        <header className="bg-white border-b border-beige-300 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+      <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+        <header className="glass px-6 py-4 flex items-center justify-between sticky top-0 z-10" style={{ borderBottom: '1px solid var(--border)' }}>
           <div>
-            <h1 className="text-2xl font-bold text-black">{'\ud83c\udf7d\ufe0f'} Waiter Panel</h1>
-            <p className="text-sm text-amber-800">
-              {user?.name} · {user?.role} · {user?.phone || user?.email}
+            <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Waiter Panel</h1>
+            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+              {user?.name} &middot; {user?.role} &middot; {user?.phone || user?.email}
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <PanelRefreshButton onClick={fetchData} loading={loading} />
-            <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 bg-amber-800 text-beige-50 rounded-xl hover:bg-amber-700 transition-colors cursor-pointer">
-              <HiOutlineLogout size={18} /> Logout
+            <button onClick={handleLogout} className="btn-primary flex items-center gap-2 px-4 py-2 rounded-xl text-sm cursor-pointer">
+              <HiOutlineLogout size={16} /> Logout
             </button>
           </div>
         </header>
-        <div className="p-6">
-          <h2 className="text-xl font-bold text-black mb-2">Select a Table</h2>
-          <p className="text-amber-800 mb-6">Tap a table to start taking orders</p>
+
+        <div className="p-6 animate-slide-up">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Select a Table</h2>
+            <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Tap a table to start taking orders</p>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {tables.map(table => (
-              <button
-                key={table._id}
-                onClick={() => selectTable(table)}
-                className={`bg-gradient-to-br ${statusColors[table.status]} border-2 rounded-2xl p-5 text-center hover:shadow-lg transition-all cursor-pointer`}
-              >
-                <div className="text-3xl mb-2">{'\ud83e\ude91'}</div>
-                <h3 className="text-xl font-bold text-black">Table {table.tableNumber}</h3>
-                <p className="text-xs text-amber-800/70">Seats: {table.capacity}</p>
-                <p className={`text-xs font-medium mt-2 capitalize ${table.status === 'available' ? 'text-green-700' : table.status === 'occupied' ? 'text-red-700' : 'text-yellow-700'}`}>{table.status}</p>
-              </button>
-            ))}
+            {tables.map(table => {
+              const statusConfig = {
+                available: { border: 'var(--success)', bg: 'var(--success-light)', text: 'var(--success-text)', label: 'Available' },
+                occupied: { border: 'var(--danger)', bg: 'var(--danger-light)', text: 'var(--danger-text)', label: 'Occupied' },
+                reserved: { border: 'var(--warning)', bg: 'var(--warning-light)', text: 'var(--warning-text)', label: 'Reserved' },
+              }[table.status] || {};
+
+              return (
+                <button
+                  key={table._id}
+                  onClick={() => selectTable(table)}
+                  className="rounded-xl p-5 text-center cursor-pointer transition-all duration-200 hover:-translate-y-1"
+                  style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    borderTop: `3px solid ${statusConfig.border}`,
+                    boxShadow: 'var(--shadow-sm)',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--shadow-lg)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }}
+                >
+                  <div className="text-3xl mb-2">🪑</div>
+                  <h3 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Table {table.tableNumber}</h3>
+                  <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>Seats: {table.capacity}</p>
+                  <span
+                    className="inline-block mt-2 px-2.5 py-0.5 rounded-full text-[11px] font-medium capitalize"
+                    style={{ background: statusConfig.bg, color: statusConfig.text }}
+                  >
+                    {statusConfig.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -156,48 +179,75 @@ const WaiterPanel = () => {
   }
 
   return (
-    <div className="min-h-screen bg-beige-50 font-serif">
-      <header className="bg-white border-b border-beige-300 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-        <button onClick={() => { setSelectedTable(null); setCart([]); setExistingOrder(null); }} className="flex items-center gap-2 text-amber-800 hover:text-amber-600 cursor-pointer">
-          <HiOutlineArrowLeft size={20} /> Back to Tables
+    <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+      <header className="glass px-6 py-3 flex items-center justify-between sticky top-0 z-10" style={{ borderBottom: '1px solid var(--border)' }}>
+        <button
+          onClick={() => { setSelectedTable(null); setCart([]); setExistingOrder(null); }}
+          className="flex items-center gap-2 text-sm font-medium cursor-pointer transition-opacity"
+          style={{ color: 'var(--accent)' }}
+          onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+        >
+          <HiOutlineArrowLeft size={18} /> Back
         </button>
         <div className="text-center">
-          <h1 className="text-xl font-bold text-black">Table {selectedTable.tableNumber} — Order</h1>
-          <p className="text-xs text-amber-800">Serving: {user?.name} ({user?.role}) · {user?.phone}</p>
+          <h1 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
+            Table {selectedTable.tableNumber}
+          </h1>
+          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Serving: {user?.name}</p>
         </div>
-        <div className="flex items-center gap-2 text-amber-800">
-          <HiOutlineShoppingCart size={20} />
-          <span className="font-bold">{cart.length} items</span>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <div className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg" style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}>
+            <HiOutlineShoppingCart size={16} />
+            <span>{cart.length}</span>
+          </div>
         </div>
       </header>
 
-      <div className="flex flex-col lg:flex-row">
+      <div className="flex flex-col lg:flex-row animate-slide-up">
         <div className="flex-1 p-6">
           {existingOrder && (
-            <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 mb-6">
-              <h3 className="font-bold text-black">Existing Order #{existingOrder._id.slice(-6)}</h3>
-              <p className="text-sm text-amber-800 mt-1">Status: {existingOrder.status} | Items: {existingOrder.items.length}</p>
-              {existingOrder.waiterId && (
-                <p className="text-xs text-black/70 mt-1">
-                  Waiter: {existingOrder.waiterId.name} ({existingOrder.waiterId.role}) · {existingOrder.waiterId.phone}
-                </p>
-              )}
-              <ul className="mt-2 space-y-1">
-                {existingOrder.items.map((item, i) => (
-                  <li key={i} className="text-sm text-black">{item.quantity}x {item.name} — ₹{(item.price * item.quantity).toFixed(2)}</li>
-                ))}
-              </ul>
+            <div className="rounded-xl p-4 mb-6" style={{ background: 'var(--warning-light)', border: '1px solid var(--warning)' }}>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-bold" style={{ color: 'var(--text-primary)' }}>
+                  Existing Order #{existingOrder._id.slice(-6)}
+                </h3>
+                <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'var(--warning)', color: '#fff' }}>
+                  {existingOrder.status}
+                </span>
+              </div>
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Items: {existingOrder.items.length} &middot; Waiter: {existingOrder.waiterId?.name || 'N/A'}</p>
             </div>
           )}
 
           <div className="flex gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide">
-            <button onClick={() => setSelectedCategory('all')} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap cursor-pointer transition-colors ${
-              selectedCategory === 'all' ? 'bg-amber-800 text-beige-50' : 'bg-white border border-beige-300 text-black hover:bg-beige-100'
-            }`}>All Items</button>
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap cursor-pointer transition-all"
+              style={{
+                background: selectedCategory === 'all' ? 'var(--accent)' : 'var(--surface)',
+                color: selectedCategory === 'all' ? 'var(--accent-text)' : 'var(--text-primary)',
+                border: '1px solid',
+                borderColor: selectedCategory === 'all' ? 'var(--accent)' : 'var(--border)',
+              }}
+            >
+              All Items
+            </button>
             {categories.map(cat => (
-              <button key={cat._id} onClick={() => setSelectedCategory(cat._id)} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap cursor-pointer transition-colors ${
-                selectedCategory === cat._id ? 'bg-amber-800 text-beige-50' : 'bg-white border border-beige-300 text-black hover:bg-beige-100'
-              }`}>{cat.name}</button>
+              <button
+                key={cat._id}
+                onClick={() => setSelectedCategory(cat._id)}
+                className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap cursor-pointer transition-all"
+                style={{
+                  background: selectedCategory === cat._id ? 'var(--accent)' : 'var(--surface)',
+                  color: selectedCategory === cat._id ? 'var(--accent-text)' : 'var(--text-primary)',
+                  border: '1px solid',
+                  borderColor: selectedCategory === cat._id ? 'var(--accent)' : 'var(--border)',
+                }}
+              >
+                {cat.name}
+              </button>
             ))}
           </div>
 
@@ -205,24 +255,36 @@ const WaiterPanel = () => {
             {filteredMenu.map(item => {
               const inCart = cart.find(c => c.menuItemId === item._id);
               return (
-                <div key={item._id} className="bg-white rounded-xl border border-beige-300 p-4 flex justify-between items-center hover:shadow-md transition-shadow">
+                <div
+                  key={item._id}
+                  className="rounded-xl p-4 flex justify-between items-center transition-all duration-200 hover:shadow-md"
+                  style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border-focus)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}
+                >
                   <div className="flex-1">
-                    <h4 className="font-semibold text-black">{item.name}</h4>
-                    <p className="text-xs text-amber-800/60 mt-0.5">{item.description}</p>
-                    <p className="text-amber-800 font-bold mt-1">₹{item.price}</p>
+                    <h4 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{item.name}</h4>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--text-tertiary)' }}>{item.description}</p>
+                    <p className="font-bold mt-1" style={{ color: 'var(--accent)' }}>₹{item.price}</p>
                   </div>
                   {inCart ? (
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => updateQuantity(item._id, -1)} className="w-8 h-8 rounded-full bg-beige-200 flex items-center justify-center text-black cursor-pointer hover:bg-beige-300 transition-colors">
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button onClick={() => updateQuantity(item._id, -1)} className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-colors" style={{ background: 'var(--surface-2)', color: 'var(--text-primary)' }}>
                         <HiOutlineMinus size={14} />
                       </button>
-                      <span className="font-bold text-black w-6 text-center">{inCart.quantity}</span>
-                      <button onClick={() => updateQuantity(item._id, 1)} className="w-8 h-8 rounded-full bg-amber-800 flex items-center justify-center text-beige-50 cursor-pointer hover:bg-amber-700 transition-colors">
+                      <span className="font-bold w-6 text-center text-sm" style={{ color: 'var(--text-primary)' }}>{inCart.quantity}</span>
+                      <button onClick={() => updateQuantity(item._id, 1)} className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer" style={{ background: 'var(--accent)', color: 'var(--accent-text)' }}>
                         <HiOutlinePlus size={14} />
                       </button>
                     </div>
                   ) : (
-                    <button onClick={() => addToCart(item)} className="px-4 py-2 bg-amber-800 text-beige-50 rounded-xl text-sm font-medium hover:bg-amber-700 transition-colors cursor-pointer">
+                    <button
+                      onClick={() => addToCart(item)}
+                      className="px-4 py-2 rounded-lg text-sm font-medium cursor-pointer btn-primary shrink-0"
+                    >
                       Add
                     </button>
                   )}
@@ -232,35 +294,38 @@ const WaiterPanel = () => {
           </div>
         </div>
 
-        <div className="lg:w-96 bg-white border-l border-beige-300 p-6 lg:min-h-screen">
-          <h3 className="text-xl font-bold text-black mb-4">Order Summary</h3>
+        <div className="lg:w-96 p-6" style={{ background: 'var(--surface-2)', borderLeft: '1px solid var(--border)' }}>
+          <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Order Summary</h3>
           {cart.length === 0 ? (
-            <p className="text-amber-800/60 italic text-center py-8">No items added yet</p>
+            <p className="text-center py-12 text-sm" style={{ color: 'var(--text-tertiary)' }}>No items added yet</p>
           ) : (
             <>
-              <div className="space-y-3 mb-6">
+              <div className="space-y-2 mb-6">
                 {cart.map(item => (
-                  <div key={item.menuItemId} className="flex items-center justify-between bg-beige-50 rounded-xl p-3">
-                    <div className="flex-1">
-                      <p className="font-medium text-black text-sm">{item.name}</p>
-                      <p className="text-xs text-amber-800">₹{item.price} × {item.quantity}</p>
+                  <div key={item.menuItemId} className="flex items-center justify-between rounded-xl p-3" style={{ background: 'var(--bg-secondary)' }}>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>{item.name}</p>
+                      <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>₹{item.price} &times; {item.quantity}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-black text-sm">₹{(item.price * item.quantity).toFixed(2)}</span>
-                      <button onClick={() => removeFromCart(item.menuItemId)} className="p-1 text-red-500 hover:bg-red-50 rounded cursor-pointer">
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>₹{(item.price * item.quantity).toFixed(2)}</span>
+                      <button onClick={() => removeFromCart(item.menuItemId)} className="p-1 rounded cursor-pointer transition-colors" style={{ color: 'var(--danger)' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--danger-light)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
                         <HiOutlineX size={16} />
                       </button>
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="border-t border-beige-300 pt-4 mb-4">
-                <div className="flex justify-between text-lg font-bold text-black">
+              <div className="pt-4 mb-4" style={{ borderTop: '1px solid var(--border)' }}>
+                <div className="flex justify-between text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
                   <span>Total</span>
                   <span>₹{cartTotal.toFixed(2)}</span>
                 </div>
               </div>
-              <button onClick={placeOrder} className="w-full py-3 bg-amber-800 text-beige-50 rounded-xl font-semibold text-lg hover:bg-amber-700 transition-all shadow-lg cursor-pointer">
+              <button onClick={placeOrder} className="btn-primary w-full py-3 rounded-xl font-semibold cursor-pointer">
                 {existingOrder ? 'Add to Existing Order' : 'Place Order'}
               </button>
             </>

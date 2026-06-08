@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import ThemeToggle from './ThemeToggle.jsx';
 import {
   HiOutlineHome,
   HiOutlineClipboardList,
@@ -17,6 +19,7 @@ import {
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { theme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -38,62 +41,97 @@ const AdminLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-beige-50 font-serif">
+    <div className="min-h-screen flex" style={{ background: 'var(--bg-primary)' }}>
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/30 z-40 lg:hidden"
+          className="fixed inset-0 z-40 lg:hidden bg-black/40 backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
           aria-hidden="true"
         />
       )}
 
       <aside
-        className={`fixed top-0 left-0 z-50 flex h-screen w-64 flex-col bg-amber-800 text-beige-50 shadow-xl transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed top-0 left-0 z-50 flex h-screen w-64 flex-col transition-transform duration-300 lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
+        style={{
+          background: 'var(--surface-glass)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          borderRight: '1px solid var(--border)',
+          boxShadow: theme === 'dark' ? '4px 0 24px rgba(0,0,0,0.3)' : '4px 0 24px rgba(0,0,0,0.06)',
+          color: 'var(--text-primary)',
+        }}
       >
-        {/* Brand — compact single line */}
-        <div className="shrink-0 border-b border-amber-700 px-4 py-3">
-          <p className="text-sm font-bold leading-tight whitespace-nowrap truncate" title="The Grand Table">
-            🍽️ The Grand Table
-          </p>
-          <p className="text-[11px] text-beige-300 mt-0.5">Admin Panel</p>
+        <div className="shrink-0 px-5 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-brand-200">
+              GT
+            </div>
+            <div>
+              <p className="text-sm font-bold leading-tight" style={{ color: 'var(--text-primary)' }}>The Grand Table</p>
+              <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-tertiary)' }}>Admin Panel</p>
+            </div>
+          </div>
         </div>
 
-        {/* Nav — scrollable, never overlaps profile */}
-        <nav className="flex-1 min-h-0 overflow-y-auto px-2 py-2">
+        <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-3 space-y-1">
           {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
               onClick={() => setSidebarOpen(false)}
-              className={`relative z-10 flex items-center gap-2.5 px-3 py-2.5 rounded-lg mb-0.5 text-sm transition-all duration-200 ${
-                isActive(item.path)
-                  ? 'bg-amber-700 text-white shadow-md'
-                  : 'text-beige-200 hover:bg-amber-700/50 hover:text-white'
-              }`}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+              style={{
+                background: isActive(item.path) ? 'var(--accent-glow)' : 'transparent',
+                color: isActive(item.path) ? 'var(--accent)' : 'var(--text-secondary)',
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive(item.path)) {
+                  e.currentTarget.style.background = 'var(--surface-2)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive(item.path)) {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                }
+              }}
             >
-              {item.icon}
-              <span className="font-medium truncate">{item.label}</span>
+              <span className="shrink-0">{item.icon}</span>
+              <span className="truncate">{item.label}</span>
+              {isActive(item.path) && (
+                <span className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: 'var(--accent)' }} />
+              )}
             </Link>
           ))}
         </nav>
 
-        {/* Profile — fixed at bottom, separate from nav */}
-        <div className="shrink-0 border-t border-amber-700 bg-amber-900/40 px-3 py-3">
-          <div className="flex items-center gap-2.5 mb-2.5 px-1">
-            <div className="w-9 h-9 shrink-0 rounded-full bg-amber-600 flex items-center justify-center font-bold text-sm">
+        <div className="shrink-0 px-3 py-3" style={{ background: 'transparent', borderTop: '1px solid var(--border)' }}>
+          <div className="flex items-center gap-3 mb-3 px-2">
+            <div className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center font-bold text-sm text-white" style={{ background: 'linear-gradient(135deg, #2563EB, #7C3AED)' }}>
               {user?.name?.charAt(0) || 'A'}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-medium text-sm truncate">{user?.name}</p>
-              <p className="text-[11px] text-beige-300 capitalize truncate">{user?.role}</p>
+              <p className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>{user?.name}</p>
+              <p className="text-[11px] capitalize truncate" style={{ color: 'var(--text-tertiary)' }}>{user?.role}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full flex items-center gap-2 justify-center px-3 py-2 bg-amber-700 hover:bg-amber-600 rounded-lg transition-colors text-sm font-medium cursor-pointer"
+            className="w-full flex items-center gap-2 justify-center px-3 py-2 rounded-xl text-sm font-medium cursor-pointer transition-all duration-200"
+            style={{
+              background: 'rgba(239,68,68,0.08)',
+              color: 'var(--danger)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(239,68,68,0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(239,68,68,0.08)';
+            }}
           >
             <HiOutlineLogout size={16} />
             Sign Out
@@ -101,27 +139,36 @@ const AdminLayout = () => {
         </div>
       </aside>
 
-      <div className="lg:ml-64 min-h-screen flex flex-col">
-        <header className="bg-white border-b border-beige-300 px-4 lg:px-8 py-3 flex items-center justify-between gap-3 sticky top-0 z-30 shrink-0">
+      <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
+        <header
+          className="px-4 lg:px-8 py-3 flex items-center justify-between gap-3 sticky top-0 z-30 shrink-0 glass"
+          style={{
+            borderBottom: '1px solid var(--border-light)',
+          }}
+        >
           <button
             type="button"
-            className="lg:hidden text-black p-2 cursor-pointer shrink-0"
+            className="lg:hidden p-2 cursor-pointer shrink-0 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            style={{ color: 'var(--text-primary)' }}
             onClick={() => setSidebarOpen(!sidebarOpen)}
             aria-label="Toggle menu"
           >
             {sidebarOpen ? <HiOutlineX size={24} /> : <HiOutlineMenu size={24} />}
           </button>
-          <h2 className="text-lg font-bold text-black truncate">
+          <h2 className="text-lg font-bold truncate" style={{ color: 'var(--text-primary)' }}>
             {navItems.find((item) => isActive(item.path))?.label || 'Admin'}
           </h2>
-          <p className="text-xs text-amber-800 text-right shrink-0 hidden sm:block">
-            {new Date().toLocaleDateString('en-IN', {
-              weekday: 'short',
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric',
-            })}
-          </p>
+          <div className="flex items-center gap-3 shrink-0">
+            <p className="text-xs text-right hidden sm:block" style={{ color: 'var(--text-secondary)' }}>
+              {new Date().toLocaleDateString('en-IN', {
+                weekday: 'short',
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              })}
+            </p>
+            <ThemeToggle />
+          </div>
         </header>
         <main className="flex-1 p-4 lg:p-8">
           <Outlet />

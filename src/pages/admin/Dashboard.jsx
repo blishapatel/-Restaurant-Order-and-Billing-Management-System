@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
 import PanelRefreshButton from '../../components/PanelRefreshButton';
+import useAnimatedCounter from '../../utils/useAnimatedCounter.js';
 import { HiOutlineClipboardList, HiOutlineCurrencyRupee, HiOutlineClock, HiOutlineViewGrid } from 'react-icons/hi';
 
 const todayStr = () => new Date().toISOString().split('T')[0];
@@ -15,11 +16,33 @@ const isSameCalendarDay = (dateStr, ymd) => {
 const formatDisplayDate = (ymd) => {
   const [y, m, d] = ymd.split('-').map(Number);
   return new Date(y, m - 1, d).toLocaleDateString('en-IN', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   });
+};
+
+const StatCard = ({ label, rawValue, prefix, icon, borderColor, iconBg, iconColor }) => {
+  const isNumber = typeof rawValue === 'number';
+  const { count, ref } = useAnimatedCounter(isNumber ? rawValue : 0, 1200, prefix === '₹' ? 2 : 0);
+  return (
+    <div
+      ref={ref}
+      className="rounded-2xl p-5 hover:shadow-lg transition-all duration-300"
+      style={{
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
+        borderLeft: `4px solid ${borderColor}`,
+        boxShadow: 'var(--shadow-sm)',
+      }}
+    >
+      <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-3" style={{ background: iconBg, color: iconColor }}>
+        {icon}
+      </div>
+      <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+        {isNumber ? `${prefix || ''}${count}` : rawValue}
+      </p>
+      <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{label}</p>
+    </div>
+  );
 };
 
 const Dashboard = () => {
@@ -37,29 +60,9 @@ const Dashboard = () => {
       let tables = [];
       let report = { totalRevenue: 0, totalOrders: 0 };
 
-      try {
-        const res = await API.get('/orders');
-        orders = res.data;
-      } catch (e) {
-        console.warn('Failed to load orders:', e.message);
-      }
-
-      try {
-        const res = await API.get('/tables');
-        tables = res.data;
-      } catch (e) {
-        console.warn('Failed to load tables:', e.message);
-      }
-
-      try {
-        const res = await API.get(`/billing/reports/daily?date=${selectedDate}`);
-        report = res.data;
-      } catch (e) {
-        const msg = e.response?.data?.message;
-        if (e.response?.status === 403) {
-          toast.error(msg || 'No permission for revenue report — log in as Admin');
-        }
-      }
+      try { const res = await API.get('/orders'); orders = res.data; } catch (e) {}
+      try { const res = await API.get('/tables'); tables = res.data; } catch (e) {}
+      try { const res = await API.get(`/billing/reports/daily?date=${selectedDate}`); report = res.data; } catch (e) {}
 
       const dayOrders = orders.filter((o) => isSameCalendarDay(o.createdAt, selectedDate));
 
@@ -80,82 +83,68 @@ const Dashboard = () => {
     }
   }, [selectedDate]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const dateLabel = isToday ? 'Today' : formatDisplayDate(selectedDate);
 
   const statCards = [
     {
-      label: `Orders · ${dateLabel}`,
-      value: stats.totalOrders,
+      label: `Orders · ${dateLabel}`, rawValue: stats.totalOrders,
       icon: <HiOutlineClipboardList size={28} />,
-      bg: 'bg-amber-50',
-      iconBg: 'bg-amber-100 text-amber-800',
+      borderColor: 'var(--chart-3)', iconBg: 'var(--warning-light)', iconColor: 'var(--warning-text)',
     },
     {
-      label: `Revenue · ${dateLabel}`,
-      value: `₹${stats.revenue.toFixed(2)}`,
+      label: `Revenue · ${dateLabel}`, rawValue: stats.revenue, prefix: '₹',
       icon: <HiOutlineCurrencyRupee size={28} />,
-      bg: 'bg-green-50',
-      iconBg: 'bg-green-100 text-green-800',
+      borderColor: 'var(--success)', iconBg: 'var(--success-light)', iconColor: 'var(--success-text)',
     },
     {
-      label: 'Pending Orders (live)',
-      value: stats.pendingOrders,
+      label: 'Pending Orders (live)', rawValue: stats.pendingOrders,
       icon: <HiOutlineClock size={28} />,
-      bg: 'bg-orange-50',
-      iconBg: 'bg-orange-100 text-orange-800',
+      borderColor: 'var(--warning)', iconBg: 'var(--orange-light)', iconColor: 'var(--orange-text)',
     },
     {
-      label: 'Available Tables',
-      value: stats.availableTables,
+      label: 'Available Tables', rawValue: stats.availableTables,
       icon: <HiOutlineViewGrid size={28} />,
-      bg: 'bg-blue-50',
-      iconBg: 'bg-blue-100 text-blue-800',
+      borderColor: 'var(--accent)', iconBg: 'var(--accent-light)', iconColor: 'var(--accent-text)',
     },
   ];
 
-  const statusColors = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    'in-kitchen': 'bg-orange-100 text-orange-800',
-    served: 'bg-blue-100 text-blue-800',
-    billed: 'bg-green-100 text-green-800',
+  const statusStyles = {
+    pending: { background: 'var(--warning-light)', color: 'var(--warning-text)' },
+    'in-kitchen': { background: 'var(--orange-light)', color: 'var(--orange-text)' },
+    served: { background: 'var(--accent-light)', color: 'var(--accent-text)' },
+    billed: { background: 'var(--success-light)', color: 'var(--success-text)' },
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="w-10 h-10 border-4 border-amber-800 border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 rounded-full animate-spin" style={{ border: '4px solid var(--border)', borderTopColor: 'var(--accent)' }} />
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="animate-slide-up">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <p className="text-amber-800 text-sm">View stats and orders for any day</p>
-          <p className="text-black font-semibold mt-1">{formatDisplayDate(selectedDate)}</p>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>View stats and orders for any day</p>
+          <p className="font-semibold mt-1" style={{ color: 'var(--text-primary)' }}>{formatDisplayDate(selectedDate)}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <label className="text-sm font-medium text-black">Date:</label>
-          <input
-            type="date"
-            value={selectedDate}
-            max={todayStr()}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="px-3 py-2 border border-beige-300 rounded-xl bg-beige-50 text-black text-sm focus:outline-none focus:ring-2 focus:ring-amber-600"
-          />
+          <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Date:</label>
+          <input type="date" value={selectedDate} max={todayStr()} onChange={(e) => setSelectedDate(e.target.value)} className="input-field text-sm py-2" />
           <button
             type="button"
             onClick={() => setSelectedDate(todayStr())}
-            className={`px-3 py-2 text-sm rounded-xl border cursor-pointer transition-colors ${
-              isToday
-                ? 'bg-amber-800 text-beige-50 border-amber-800'
-                : 'border-beige-300 text-amber-800 hover:bg-beige-100'
-            }`}
+            className="px-3 py-2 text-sm rounded-xl font-medium cursor-pointer transition-all"
+            style={{
+              background: isToday ? 'var(--accent)' : 'var(--surface)',
+              color: isToday ? 'var(--accent-text)' : 'var(--text-primary)',
+              border: `1px solid ${isToday ? 'var(--accent)' : 'var(--border)'}`,
+              boxShadow: isToday ? 'var(--shadow-glow)' : 'none',
+            }}
           >
             Today
           </button>
@@ -164,67 +153,49 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {statCards.map((card, i) => (
-          <div
-            key={i}
-            className={`${card.bg} rounded-2xl p-5 border border-beige-300 shadow-sm hover:shadow-md transition-shadow`}
-          >
-            <div className={`w-11 h-11 rounded-xl ${card.iconBg} flex items-center justify-center mb-3`}>
-              {card.icon}
-            </div>
-            <p className="text-2xl font-bold text-black">{card.value}</p>
-            <p className="text-xs text-amber-800 mt-1">{card.label}</p>
-          </div>
-        ))}
+        {statCards.map((card, i) => <StatCard key={i} {...card} />)}
       </div>
 
-      <div className="bg-white rounded-2xl border border-beige-300 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-beige-200 flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-lg font-bold text-black">Orders on {dateLabel}</h3>
-          <span className="text-sm text-amber-800">{recentOrders.length} order(s)</span>
+      <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+        <div className="px-6 py-4 flex flex-wrap items-center justify-between gap-2" style={{ borderBottom: '1px solid var(--border)' }}>
+          <h3 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Orders on {dateLabel}</h3>
+          <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{recentOrders.length} order(s)</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-beige-100">
+            <thead style={{ background: 'var(--surface-2)' }}>
               <tr>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-amber-800">Table</th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-amber-800">Order ID</th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-amber-800">Items</th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-amber-800">Total</th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-amber-800">Status</th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-amber-800">Time</th>
+                {['Table', 'Order ID', 'Items', 'Total', 'Status', 'Time'].map((h) => (
+                  <th key={h} className="text-left px-4 py-3 text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>{h}</th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-beige-200">
+            <tbody>
               {recentOrders.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-8 text-center text-amber-800/60 italic">
-                    No orders on this date
-                  </td>
+                  <td colSpan="6" className="px-6 py-8 text-center italic" style={{ color: 'var(--text-tertiary)' }}>No orders on this date</td>
                 </tr>
               ) : (
                 recentOrders.map((order) => (
-                  <tr key={order._id} className="hover:bg-beige-50 transition-colors">
+                  <tr key={order._id} className="transition-colors duration-200" style={{ borderBottom: '1px solid var(--border-light)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface-hover)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
                     <td className="px-4 py-3">
-                      <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2 py-1 rounded-lg bg-amber-800 text-beige-50 font-bold text-sm">
+                      <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2 py-1 rounded-lg font-bold text-sm" style={{ background: 'var(--accent)', color: 'var(--text-inverse)' }}>
                         {order.tableId?.tableNumber ?? '—'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-black font-mono">#{order._id.slice(-6)}</td>
-                    <td className="px-4 py-3 text-sm text-black">{order.items.length} items</td>
-                    <td className="px-4 py-3 text-sm text-black font-semibold">
+                    <td className="px-4 py-3 text-sm font-mono" style={{ color: 'var(--text-primary)' }}>#{order._id.slice(-6)}</td>
+                    <td className="px-4 py-3 text-sm" style={{ color: 'var(--text-primary)' }}>{order.items.length} items</td>
+                    <td className="px-4 py-3 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                       ₹{order.items.reduce((s, i) => s + i.price * i.quantity, 0).toFixed(2)}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${statusColors[order.status]}`}>
-                        {order.status}
-                      </span>
+                      <span className="px-2 py-1 rounded-full text-xs font-medium capitalize" style={statusStyles[order.status] || {}}>{order.status}</span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-amber-800/70 whitespace-nowrap">
-                      {new Date(order.createdAt).toLocaleTimeString('en-IN', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+                    <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--text-tertiary)' }}>
+                      {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                     </td>
                   </tr>
                 ))
