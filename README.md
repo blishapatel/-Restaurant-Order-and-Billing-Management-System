@@ -1,3 +1,9 @@
+
+
+https://github.com/user-attachments/assets/ce461fec-a6f5-4305-81ca-dbf6d3fa1c03
+
+
+
 # The Grand Table — Restaurant Order & Billing Management System
 
 A full-stack restaurant management app for taking orders, kitchen workflow, cashier billing, admin analytics, and printable receipts. Built with **React (Vite)**, **Node.js / Express**, **MongoDB**, and **Chart.js**.
