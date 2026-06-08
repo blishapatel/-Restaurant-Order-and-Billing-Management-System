@@ -22,7 +22,6 @@ A full-stack restaurant management app for taking orders, kitchen workflow, cash
 - **Payment methods**: Cash, Card (Visa / Mastercard / RuPay with simulated processing), UPI (Google Pay / PhonePe / Paytm / BHIM with QR code)
 - **Printable receipts** styled for 80mm thermal printers
 - **Dark mode** toggle with glassmorphism UI
-- **Responsive design** — works on mobile, tablet, and desktop
 - **Role-based authentication** with JWT
 
 ### Admin Pages
@@ -164,16 +163,9 @@ npm start
 
 Opens at: `http://localhost:5000`
 
-### Access from Other Devices (phone, tablet)
-
-1. Run `npm run build` then `npm start`
-2. Look for `Network: http://192.168.x.x:5000` in the terminal
-3. Connect your phone/tablet to the **same WiFi**
-4. Open Chrome and type that URL
-
-> **Note:** MongoDB must be running on your PC for data to work.
-
 ---
+
+
 
 ## Demo Login Accounts (after seed)
 
@@ -224,11 +216,6 @@ Click **Cash** → **Confirm Cash Payment** → payment recorded.
 
 ### Password Visibility Toggle
 Both **Login** and **Register** pages have eye icons on password fields to show/hide passwords.
-
-### Responsive Breakpoints
-- Mobile: single column, stacked layouts, touch-friendly 44px minimum tap targets
-- Tablet: 2-column grids
-- Desktop: full multi-column layouts with persistent sidebar
 
 ### Animations
 - `scale-in` — modals and cards

@@ -257,24 +257,6 @@ body {
   animation: float 3s ease-in-out infinite;
 }
 
-/* Responsive utilities */
-@media (max-width: 640px) {
-  .responsive-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .responsive-stack { flex-direction: column !important; }
-  .responsive-grid-2 { grid-template-columns: repeat(2, 1fr) !important; }
-  .responsive-pad { padding-left: 1rem !important; padding-right: 1rem !important; }
-}
-
-@media (min-width: 641px) and (max-width: 1024px) {
-  .responsive-table { overflow-x: auto; }
-}
-
-/* Touch-friendly inputs */
-@media (pointer: coarse) {
-  input, select, textarea, button, a { min-height: 44px; }
-  .btn-primary, .input-field { min-height: 44px; }
-}
-
 /* Print receipt styles */
 .restaurant-receipt {
   max-width: 320px;
