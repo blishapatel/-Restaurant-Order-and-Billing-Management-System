@@ -1,8 +1,20 @@
+const path = require('path');
+const os = require('os');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const Razorpay = require('razorpay');
 require('dotenv').config();
+
+function getNetworkIP() {
+  const ifaces = os.networkInterfaces();
+  for (const name of Object.keys(ifaces)) {
+    for (const iface of ifaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) return iface.address;
+    }
+  }
+  return null;
+}
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
@@ -42,9 +54,18 @@ app.use('/api/tables', tableRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/billing', billingRoutes);
 
-// Health check
-app.get('/', (req, res) => {
-  res.json({ message: 'Restaurant API is running' });
+// Serve built frontend in production
+const distPath = path.join(__dirname, '..', 'dist');
+app.use(express.static(distPath));
+
+// API 404 for unmatched API routes
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ error: 'API route not found' });
+});
+
+// Catch-all: serve index.html for SPA frontend routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
 });
 
 // Connect to MongoDB and start server
@@ -53,8 +74,11 @@ const PORT = process.env.PORT || 5000;
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('MongoDB connected successfully');
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);
+      console.log(`Local:   http://localhost:${PORT}`);
+      const network = getNetworkIP();
+      if (network) console.log(`Network: http://${network}:${PORT}`);
     });
   })
   .catch((err) => {
